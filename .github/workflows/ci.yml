@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint with PSScriptAnalyzer
+        shell: powershell
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          $results = Invoke-ScriptAnalyzer -Path .\ADAuditToolkit -Recurse -Severity Error
+          $results | Format-Table -AutoSize
+          if ($results.Count -gt 0) { throw "PSScriptAnalyzer found $($results.Count) error(s)." }
+
+      - name: Run Pester tests
+        shell: powershell
+        run: |
+          Install-Module Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+          Import-Module Pester -MinimumVersion 5.5.0
+          $config = New-PesterConfiguration
+          $config.Run.Path = '.\tests'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          Invoke-Pester -Configuration $config
+
+      - name: Demo mode smoke run
+        shell: powershell
+        run: |
+          Import-Module .\ADAuditToolkit\ADAuditToolkit.psd1
+          $result = Invoke-ADAudit -Demo -OutputPath .\ADAuditReport.html -PassThru
+          if (-not (Test-Path .\ADAuditReport.html)) { throw 'Report was not generated.' }
+          if ($result.TotalFindings -lt 1) { throw 'Demo run produced no findings.' }
+
+      - name: Upload demo report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-report
+          path: ADAuditReport.html

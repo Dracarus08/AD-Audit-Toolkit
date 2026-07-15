@@ -1,0 +1,9 @@
+# Report output from local runs
+/ADAuditReport*.html
+/ADAuditReport*.json
+TestResults.xml
+
+# OS noise
+Thumbs.db
+Desktop.ini
+.DS_Store
