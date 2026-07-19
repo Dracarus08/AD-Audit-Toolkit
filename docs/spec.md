@@ -49,4 +49,4 @@ Findings map to MITRE ATT&CK techniques attackers use against these weaknesses: 
 1. `Invoke-ADAudit -Demo` produces the HTML report on a clean machine in under 60 seconds.
 2. All checks covered by Pester tests against the seeded dataset.
 3. Real screenshots of the report captured from a real run.
-4. README to standard. Defense pack written. gitleaks clean.
+4. README to standard. gitleaks clean.
